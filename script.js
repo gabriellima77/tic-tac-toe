@@ -113,7 +113,17 @@ const game = (()=> {
         tiles.forEach(tile=> container.removeChild(tile));
     }
     
+    const computerMove = ()=> {
+        let index;
+        do{
+            index = Math.floor(Math.random() * 9);
+        }while(gameBoard.getBoard()[index] != "");
+        gameBoard.updateBoard(index, players[turn].type);
+        return index;
+    }
+
     const movement = (div, text)=> {
+        console.log(players);
         if(hasAWinner) return;
         console.log(gameBoard.getBoard());
         const tiles = Array.from(document.querySelectorAll(".tile"));
@@ -125,8 +135,11 @@ const game = (()=> {
             (!turn)? turn++: turn--;
         }
         text.textContent = `It's ${players[turn].getPlayerName()} turn.`;
-        if(players[turn].isABot){
-            text.textContent = `It's Computer turn.`;
+        if(players[turn].isABot && !hasAWinner){
+            tiles[computerMove()].textContent = players[turn].type;
+            hasAWinner = isgameOver(players[turn]);
+            turn = 0;
+            return; 
         }
         if(isTie() && !hasAWinner){
             displayResult("tie");
