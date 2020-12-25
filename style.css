@@ -29,6 +29,23 @@ header {
     height: 20vh;
 }
 
+#result {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    background-color: #00b2ca57;
+    width: 40vw;
+    height: 60vh;
+}
+
+#text {
+    font-size: 2rem;
+    color: #283D3B;
+    top: 0;
+    position: relative;
+}
+
 h1 {
     font-size: 3rem;
     margin: 0;
@@ -139,6 +156,10 @@ input::placeholder {
     width: 100%;
     height: 100%;
     cursor: pointer;
+}
+
+.tile:hover {
+    background-color: #00b2ca57;
 }
 
 .bottomBord {

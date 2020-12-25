@@ -3,22 +3,29 @@ const game = (()=> {
     let hasAWinner = false;
     let players;
     let turn = 0;
+    let gameType;
     const winConditions = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
-    const body = document.querySelector("body");
 
     const gameBoard = (()=> {
         const board = ["", "", "", "", "", "", "", "", ""];
         const updateBoard = (index, type) => board[index] = type;
         const getBoard = () => board;
-        return {updateBoard, getBoard};
+        const resetBoard = ()=>{
+            for(let i = 0; i < board.length; i++){
+                board[i] = "";
+            }
+        }
+        return {updateBoard, getBoard, resetBoard};
     })();
         
-    const player = (playerName = "Player", option, bot)=> {
-        const name = playerName;
+    const player = (option, bot)=> {
+        let name = "Player";
         const type = option;
         const isABot = bot;
+        const getPlayerName = ()=> name;
+        const setPlayerName = (PlayerName)=> name = PlayerName; 
         let count = 0;
-        return {name, type, count, isABot};
+        return {type, count, isABot, getPlayerName, setPlayerName};
     }
 
     const getOption = (option, startBtn, options)=> {
@@ -29,6 +36,7 @@ const game = (()=> {
             }
         })[0];
         startBtn.style.display = "flex";
+        gameType = option;
         if(option == "players"){
             document.querySelector("form").style.display = "flex";
             options.forEach(div=> div.style.display = "none");
@@ -57,6 +65,21 @@ const game = (()=> {
         return (count == board.length)?true:false;
     }
 
+    const displayResult = (res)=> {
+        const restartBtn = document.querySelector("#start");
+        restartBtn.textContent = "Play Again";
+        restartBtn.style.display = "flex";
+        const result = document.querySelector("#result");
+        result.style.display = "flex";
+        gameType = "reset";
+        if(res == "tie"){
+            result.firstElementChild.textContent = "It's a Tie!";
+        }
+        else {
+            result.firstElementChild.textContent = `${players[turn].getPlayerName()} won!`;
+        }
+    }
+
     const isgameOver = (player)=> {
         const board = gameBoard.getBoard();
         for(let i = 0; i < 8; i++){
@@ -66,22 +89,33 @@ const game = (()=> {
                     player.count++;
                 }
             }
-            if(player.count == 3) return true;
+            if(player.count == 3) {
+                displayResult("player");
+                return true;
+            }
             player.count = 0;
         }
         return false;
     }
 
-    const render = ()=> {
-        gameBoard.getBoard().forEach(place => {
-            const para = document.createElement("p");
-            para.textContent = place;
-            body.appendChild(para);
-        })
+    const resetGame = (container)=> {
+        const tiles = document.querySelectorAll(".tile");
+        const result = document.querySelector("#result");
+        turn = 0;
+        players.forEach(player=> player.count = 0);
+        gameBoard.resetBoard();
+        hasAWinner = false;
+        // remove resultDiv;
+        result.style.display = "none";
+        result.firstElementChild.textContent = "";
+        // reset Container
+        document.querySelector(".text").textContent = "";
+        tiles.forEach(tile=> container.removeChild(tile));
     }
     
     const movement = (div, text)=> {
         if(hasAWinner) return;
+        console.log(gameBoard.getBoard());
         const tiles = Array.from(document.querySelectorAll(".tile"));
         const index = tiles.indexOf(div);
         if(gameBoard.getBoard()[index] == ""){
@@ -90,40 +124,74 @@ const game = (()=> {
             hasAWinner = isgameOver(players[turn]);
             (!turn)? turn++: turn--;
         }
-        text.textContent = `It's Player ${turn+1} turn.`;
-        if(isTie()){
-            document.querySelector(".text").textContent = "It's a Tie!";
+        text.textContent = `It's ${players[turn].getPlayerName()} turn.`;
+        if(players[turn].isABot){
+            text.textContent = `It's Computer turn.`;
+        }
+        if(isTie() && !hasAWinner){
+            displayResult("tie");
+        }
+    }
+
+    const isValidName = ()=> {
+        const inputs = document.querySelectorAll("input");
+        let count = 0;
+        inputs.forEach(input=> {
+            const span = input.parentNode.firstElementChild;
+            if(/^[a-zA-Z][\d\D]{0,49}/.test(input.value)){
+                span.textContent = "";
+                count++;
+            }
+            else{
+                span.textContent = "First character has to be a letter and max size is 50";
+                span.style.display = "inline";
+            }
+        })
+        if(gameType != "players"){
+            return true;
+        }
+        if(count == 2){
+            players[0].setPlayerName(inputs[0].value);
+            players[1].setPlayerName(inputs[1].value);
+            document.querySelector('form').style.display = "none";
+            return true;
+        }
+        else {
+            return false;
         }
     }
 
     const start = (container, startBtn)=> {
+        resetGame(container);
         const text = document.querySelector(".text");
-        startBtn.style.display = "none";
-        Array.from(container.children).forEach(tag => {
-            if(tag.nodeName == "DIV"){
-                tag.style.display = "none";
+        if(isValidName()){
+            startBtn.style.display = "none";
+            Array.from(container.children).forEach(tag => {
+                if(tag.nodeName == "DIV"){
+                    tag.style.display = "none";
+                }
+                else{
+                    tag.textContent = "";
+                }
+            });
+            container.classList.add("grid");
+            for(let i = 0; i < 9; i++){
+                const div = document.createElement("div");
+                if(i % 3 != 2){
+                    div.classList.add("rightBord");
+                }
+                if(i < 6){
+                    div.classList.add("bottomBord");
+                }
+                div.classList.add("tile");
+                div.addEventListener("click", movement.bind(null, div, text));
+                container.appendChild(div);
             }
-            else{
-                tag.textContent = "";
-            }
-        });
-        container.classList.add("grid");
-        for(let i = 0; i < 9; i++){
-            const div = document.createElement("div");
-            if(i % 3 != 2){
-                div.classList.add("rightBord");
-            }
-            if(i < 6){
-                div.classList.add("bottomBord");
-            }
-            div.classList.add("tile");
-            div.addEventListener("click", movement.bind(null, div, text));
-            container.appendChild(div);
+            text.textContent = `It's ${players[turn].getPlayerName()} turn.`;
         }
-        text.textContent = `It's Player ${turn+1} turn.`;
     }
 
-    const menuEvents = ()=> {
+    const init = ()=> {
         // ====== Start Game Event ====== //
         const container = document.querySelector(".container");
         const startBtn = document.querySelector("#start");
@@ -141,7 +209,7 @@ const game = (()=> {
         });
     }
 
-    return {menuEvents};
+    return {init};
 })();
 
- game.menuEvents();
+ game.init();
