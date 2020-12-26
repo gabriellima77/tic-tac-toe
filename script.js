@@ -48,14 +48,14 @@ const game = (()=> {
         else{
             const player_1 = player("X", false);
             const player_2 = player("O", true);
+            player_2.setPlayerName("Computer");
 
             players = [player_1, player_2];
         }
         div.style.backgroundColor = "#1d4e89";
     }
 
-    const isTie = ()=> {
-        const board = gameBoard.getBoard();
+    const isTie = (board = gameBoard.getBoard())=> {
         let count = 0;
         board.forEach(field=> {
             if(field != ""){
@@ -80,8 +80,7 @@ const game = (()=> {
         }
     }
 
-    const isgameOver = (player)=> {
-        const board = gameBoard.getBoard();
+    const isgameOver = (player, board = gameBoard.getBoard())=> {
         for(let i = 0; i < 8; i++){
             for(let j = 0; j < 3; j++){
                 let index = winConditions[i][j];
@@ -90,7 +89,6 @@ const game = (()=> {
                 }
             }
             if(player.count == 3) {
-                displayResult("player");
                 return true;
             }
             player.count = 0;
@@ -113,37 +111,103 @@ const game = (()=> {
         tiles.forEach(tile=> container.removeChild(tile));
     }
     
+    const score = {
+        X:  -1,
+        O:   1,
+        tie: 0
+    }
+
+    const miniMax = (board, depth, isMaximizing, player)=> {
+        let result = null;
+        if(isTie(board)){
+            result = "tie";
+        }
+        if(isgameOver(player, board)){
+            result = player.type;
+            player.count = 0;
+        }
+        if(result != null){
+            return score[result];
+        }
+        if(isMaximizing){
+            let bestScore = -Infinity;
+            for(let i = 0; i < board.length; i++){
+                if(board[i] == ""){
+                    board[i] = players[1].type;
+                    let score = miniMax(board, depth + 1, false, players[0]);
+                    board[i] = "";
+                    if(bestScore < score){
+                        bestScore = score;
+                    }
+                }
+            }
+            return bestScore;
+        }
+        else {
+            let bestScore = Infinity;
+            for(let i = 0; i < board.length; i++){
+                if(board[i] == ""){
+                    board[i] = players[0].type;
+                    let score = miniMax(board, depth + 1, true, players[1]); 
+                    board[i] = "";
+                    if(bestScore > score){
+                        bestScore = score;
+                    }
+                }
+            }
+            return bestScore;
+        }
+    }
+
     const computerMove = ()=> {
-        let index;
+/*         let index;
         do{
             index = Math.floor(Math.random() * 9);
         }while(gameBoard.getBoard()[index] != "");
+        gameBoard.updateBoard(index, players[turn].type); */
+        let bestScore = -Infinity;
+        const board = [...gameBoard.getBoard()];
+        let index;
+        for(let i = 0; i < board.length; i++){
+            if(board[i] == ""){
+                board[i] = players[1].type;
+                let score = miniMax(board, 0, false, players[0]);
+                board[i] = "";
+                if(score > bestScore){
+                    bestScore = score;
+                    index = i;
+                }
+            }
+        }
         gameBoard.updateBoard(index, players[turn].type);
+        if(isgameOver(players[1])){
+            displayResult("computer");
+        }
         return index;
     }
 
     const movement = (div, text)=> {
-        console.log(players);
         if(hasAWinner) return;
-        console.log(gameBoard.getBoard());
         const tiles = Array.from(document.querySelectorAll(".tile"));
         const index = tiles.indexOf(div);
         if(gameBoard.getBoard()[index] == ""){
             gameBoard.updateBoard(index, players[turn].type);
             div.textContent = players[turn].type;
             hasAWinner = isgameOver(players[turn]);
+            if(hasAWinner){
+                displayResult("player");
+            }
             (!turn)? turn++: turn--;
-        }
-        text.textContent = `It's ${players[turn].getPlayerName()} turn.`;
-        if(players[turn].isABot && !hasAWinner){
-            tiles[computerMove()].textContent = players[turn].type;
-            hasAWinner = isgameOver(players[turn]);
-            turn = 0;
-            return; 
         }
         if(isTie() && !hasAWinner){
             displayResult("tie");
         }
+        if(players[turn].isABot && !hasAWinner){
+            tiles[computerMove()].textContent = players[turn].type;
+            hasAWinner = isgameOver(players[turn]);
+            turn = 0;
+        }
+        text.textContent = `It's ${players[turn].getPlayerName()} turn.`;
     }
 
     const isValidName = ()=> {
