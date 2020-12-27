@@ -192,6 +192,23 @@ input::placeholder {
     font-size: 1.8rem;
 }
 
+ @media (max-width: 1440px){
+    .warning {
+        font-size: 0.8rem;
+    }
+
+    #start {
+        margin-top: 23%;
+    }
+}
+
+@media (min-width: 1441px){
+    * {
+        font-size: 40px;
+    }
+}
+
+
 @media (max-width: 1023px){
     .container #players, .container #ai{
         font-size: 0.8rem;
@@ -254,25 +271,5 @@ input::placeholder {
 
     #start {
         margin-top: 45%;
-    }
-}
-
-@media (min-width: 1025px){
-    *{
-        font-size: 25px;
-    }
-
-    .warning {
-        font-size: 0.8rem;
-    }
-
-    #start {
-        margin-top: 23%;
-    }
-}
-
-@media (min-width: 1441px){
-    * {
-        font-size: 40px;
     }
 }
