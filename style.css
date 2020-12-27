@@ -114,7 +114,7 @@ label {
 
 .warning {
     display: none;
-    color: rgb(255, 0, 0);
+    color: #f87060;
     text-shadow: 2px 2px 3px #283D3B;
 }
 
@@ -192,4 +192,87 @@ input::placeholder {
     font-size: 1.8rem;
 }
 
+@media (max-width: 1023px){
+    .container #players, .container #ai{
+        font-size: 0.8rem;
+    }
 
+    .warning {
+        font-size: .7rem;
+    }
+
+
+    #start {
+        margin-top: 20%;
+    }
+}
+
+@media (max-width: 767px){
+    header {
+        width: 100vw;
+    }
+    
+    .container {
+        width: 80vw;
+    }
+
+    #start {
+        margin-top: 35%;
+        width: 35vw;
+    }
+
+    .text {
+        top: 13%;
+        width: 80vw;
+        font-size: 1rem;
+    }
+
+    #result {
+        width: 80vw;
+    }
+}
+
+@media (max-width: 376px){
+    #start {
+        margin-top: 40%;
+        width: 40vw;
+    }
+}
+
+@media (max-width: 321px){
+    .container {
+        width: 100vw;
+    }
+
+    .text {
+        width: 100vw;
+    }
+
+    #result {
+        width: 100vw;
+    }
+
+    #start {
+        margin-top: 45%;
+    }
+}
+
+@media (min-width: 1025px){
+    *{
+        font-size: 25px;
+    }
+
+    .warning {
+        font-size: 0.8rem;
+    }
+
+    #start {
+        margin-top: 23%;
+    }
+}
+
+@media (min-width: 1441px){
+    * {
+        font-size: 40px;
+    }
+}
